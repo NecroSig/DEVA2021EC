@@ -1,42 +1,33 @@
-#include <stdio.h>
 #include <stdlib.h>
+#include "HS_STRUCTURES.h"
+#include "HS_MECANIQUES.h"
 
-typedef struct s_partie
+int main(int argc, char *argv[])
 {
-  int tourJoueur; // 0=J1, 1=J2
-  int compteurTour;
-  int *pionsCaptures; //[nbPionsJ1,nbPionsJ2]
-  int **plateau;
-  int ****pionsJoueurs; //[  [ [1,1],[1,2] ] [ [9,1][9,2] ]  ]
-  char *dernierMouvement; //Format : A2 -> D2
-}t_partie;
+  //menu
+  /*
+  char *bienvenue = "Hasami Shogi";
+  char *hr = "------------";
+  char *version = "Version Alpha 0.1";
 
-typedef struct s_jeu
-{
-  int solo; //0=n 1=y
-  int difficulte;
-  char *nameFile; //NULL
-  char **playerNames; //["Trevor","Bryan"]
-  t_partie *partie;
-}t_jeu;
+  int **plateau = gen_plateau();
 
-t_jeu* initialisation()
-{
-  t_jeu* jeu = malloc( sizeof(t_partie) );
-  if (jeu == NULL) {exit(0);}
+  plateau[0][0] = 1;
+  plateau[0][1] = 2;
+  affichePlateau(plateau);
 
-  jeu -> solo = 1;
-  jeu -> difficulte = 0;
-  jeu -> nameFile = NULL;
-  jeu -> playerNames = NULL;
-  jeu -> partie = NULL;
+  int* test = coordonneesVersEntier("2G");
+  char* lol = entierVersCoordonnees(test);
+  printf("%d %d",test[0], test[1] );
+  printf("\n%s",lol );
+  */
 
-  return jeu;
-}
-
-int main()
-{
-  t_jeu *jeu = initialisation();
+  int **plateau = gen_plateau();
+  affichePlateau(plateau);
+  printf("LOG");
+  int ***pions = gen_pionsjoueur();
+  placementPionsPlateau(pions,plateau);
+  affichePlateau(plateau);
 
   return 0;
 }
