@@ -14,8 +14,7 @@ int pionEJoueur(int nbJoueur,int*** pions, int* pionSelect);
 int mouvementPionPossible(int** plateau,int* depart, int* arrivee);
 void afficheInfosJeu(int** plateau); //fonction a développer
 
-//Fonction a faire -> Mouvement possible
-// 2-> par rapport aux autres pions
+
 
 //Fonction a faire -> capture
 // 1-> check si capture, 1.1-> détecteur de pions autour de soi

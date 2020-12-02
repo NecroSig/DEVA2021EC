@@ -17,31 +17,19 @@
 int main(int argc, char *argv[])
 {
   //menu
-  /*
-  char *bienvenue = "Hasami Shogi";
-  char *hr = "------------";
-  char *version = "Version Alpha 0.1";
+  struct s_partie *partie = initialisationPartie();
 
-  int **plateau = gen_plateau();
 
-  plateau[0][0] = 1;
-  plateau[0][1] = 2;
-  affichePlateau(plateau);
+  partie->plateau = gen_plateau();
+  partie->pionsJoueurs = gen_pionsjoueur();
 
-  int* test = coordonneesVersEntier("2G");
-  char* lol = entierVersCoordonnees(test);
-  printf("%d %d",test[0], test[1] );
-  printf("\n%s",lol );
-  */
-
-  int **plateau = gen_plateau();
-  int ***pions = gen_pionsjoueur();
 
   while (1) {
     //CLEARSCREEN();
-    refreshPlateau(pions,plateau);
-    affichePlateau(plateau);
-    deplacementPion(plateau,pions);
+    //changer pour passer les pointeurs des structures uniquement
+    refreshPlateau(partie->pionsJoueurs,partie->plateau);
+    affichePlateau(partie->plateau);
+    deplacementPion(partie->plateau,partie->pionsJoueurs); //le joueur est verrouillé pour l'instant
     //affichePionsJoueur(pions);
   }
 

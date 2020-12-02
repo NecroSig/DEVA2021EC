@@ -1,17 +1,5 @@
 #include <stdlib.h>
 
-//Ajout du texte par fichier ?
-//location A2
-/*struct s_texte
-{
-  char bienvenue[] = "Hasami Shogi";
-  char hr[] = "------------";
-  char version[] = "Version Alpha 0.1";
-
-};*/
-
-
-
 struct s_partie
 {
   int tourJoueur; // 0=J1, 1=J2
@@ -21,7 +9,6 @@ struct s_partie
   int ***pionsJoueurs; //[ [ [1,1],[1,2] ] [ [9,1][9,2] ] ]
   char *dernierMouvement; //Format : A2 -> D2
 };
-
 
 struct s_jeu
 {
@@ -47,6 +34,20 @@ struct s_jeu* initialisationJeu()
 
   return jeu;
 }
+
+struct s_partie* initialisationPartie()
+{
+  struct s_partie* partie = malloc(sizeof(struct s_partie));
+  if (partie == NULL) {exit(0);}
+
+  partie -> tourJoueur = 0;
+  partie -> compteurTour = 0;
+  partie -> pionsCaptures = NULL;
+  partie -> plateau = NULL;
+  partie -> pionsJoueurs = NULL;
+  partie -> dernierMouvement = NULL;
+}
+
 
 
 int deconstructionJeu(struct s_jeu* instance)
