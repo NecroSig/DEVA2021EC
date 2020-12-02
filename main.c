@@ -1,6 +1,18 @@
 #include <stdlib.h>
+#include <stdio.h>
+#include "CHAINE.h"
 #include "HS_STRUCTURES.h"
 #include "HS_MECANIQUES.h"
+
+#if _WIN32
+    #define CLEARSCREEN(); system("cls");
+  #elif __LINUX__
+    #define CLEARSCREEN(); system("clear");
+	#else
+	  #define CLEARSCREEN(); printf("\n");
+#endif
+
+
 
 int main(int argc, char *argv[])
 {
@@ -23,11 +35,15 @@ int main(int argc, char *argv[])
   */
 
   int **plateau = gen_plateau();
-  affichePlateau(plateau);
-  printf("LOG");
   int ***pions = gen_pionsjoueur();
-  placementPionsPlateau(pions,plateau);
-  affichePlateau(plateau);
+
+  while (1) {
+    //CLEARSCREEN();
+    refreshPlateau(pions,plateau);
+    affichePlateau(plateau);
+    deplacementPion(plateau,pions);
+    //affichePionsJoueur(pions);
+  }
 
   return 0;
 }
