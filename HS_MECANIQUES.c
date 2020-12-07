@@ -1,34 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "HS_STRUCTURES.h"
 #include "CHAINE.h"
 
-int** gen_plateau()
-{
-  int **tab = NULL;
-  int i; int j;
 
-  int nbLignes = 10;
-  int nbColonnes = 10;
+#if _WIN32
+    #define CLEARSCREEN(); system("cls");
+  #elif __LINUX__
+    #define CLEARSCREEN(); system("clear");
+	#else
+	  #define CLEARSCREEN(); printf("\n");
+#endif
 
-  //Allocation du tableau + 1 pour les infos plateau
-  tab = (int**) malloc ( (nbLignes * sizeof(int*)));
-  if (tab == NULL) {exit(0);}
-
-  for ( i = 0 ; i < nbLignes ; i++ )
-  {
-    tab[i] = (int*) malloc(nbColonnes * sizeof(int));
-  }
-
-  //Remplissage du tableau - 1
-  for (i = 0; i < nbLignes-1; i = i + 1)
-  {
-      for (j = 0; j < nbColonnes-1; j = j + 1)
-      {
-        tab[i][j] = 0 ;
-      }
-  }
-  return tab;
-}
 
 void affichePionsJoueur(int*** tab)
 {
@@ -43,7 +26,6 @@ void affichePionsJoueur(int*** tab)
     printf("\n");
   }
 }
-
 
 void affichePlateau(int **tab)
 {
@@ -100,46 +82,6 @@ void affichePlateau(int **tab)
   }
 }
 
-int*** gen_pionsjoueur()
-{
-  //Initialisation à 0
-  int i;int j;int k;
-  int*** pionsJoueur = NULL;
-  pionsJoueur = malloc(sizeof(int**)*2);
-  for (i=0; i<2 ;i++)
-  {
-    pionsJoueur[i] = malloc(sizeof(int*)*9);
-  }
-
-  for (i=0; i<2;i++)
-  {
-    for (j=0; j<9; j++)
-    {
-      pionsJoueur[i][j] = malloc(sizeof(int)*2);
-    }
-  }
-
-  // Si chargemement fichier, on suit le fichier
-  for (i=0; i<2;i++)
-  {
-    for (j=0; j<9; j++)
-    {
-      //A partir de là il faut les placer sur le plateau à leur position initiale
-      if (i == 0)
-      {
-        pionsJoueur[i][j][0] = 0;
-        pionsJoueur[i][j][1] = j;
-      }
-      else if (i == 1)
-      {
-        pionsJoueur[i][j][0] = 8;
-        pionsJoueur[i][j][1] = j;
-      }
-    }
-  }
-  return pionsJoueur;
-}
-
 void refreshPlateau(int*** pionsJoueurs, int** plateau)
 {
   int i; int j;
@@ -158,12 +100,6 @@ void refreshPlateau(int*** pionsJoueurs, int** plateau)
     }
   }
 }
-
-void libererPionsJoueurs(int ***instance)
-{
-  // A faire
-}
-
 
 int* cherchePion(int*** pionsJoueurs,int* coordonnees)
 {
@@ -184,6 +120,16 @@ int* cherchePion(int*** pionsJoueurs,int* coordonnees)
   return NULL;
 }
 
+void afficheInfosJeu(struct s_partie* p)
+{
+  CLEARSCREEN();
+  printf("--- Tour : %2d ---\n\n",p->compteurTour + 1 );
+  printf("Tour du joueur %d\n",p->tourJoueur + 1);
+
+  if (p->compteurTour == 0){}
+  else { printf("Dernier coup joue : %s",p->dernierMouvement); }
+  affichePlateau(p->plateau);
+}
 
 void movePion(int** plateau, int* depart, int* arrivee)
 {
@@ -209,7 +155,6 @@ int pionEJoueur(int nbJoueur,int*** pions, int* pionSelect)
   //printf("Pion n'appartient pas au joueur\n");
   return 1;
 }
-
 
 int mouvementPionPossible(int** plateau,int* depart, int* arrivee)
 {
@@ -278,41 +223,61 @@ int mouvementPionPossible(int** plateau,int* depart, int* arrivee)
   }
 }
 
-
-int deplacementPion(int** plateau, int*** pions)
+//quand le pion se déplace on check si il y a des pions ennemis autour 
+int encercle(int** plateau, int tourJoueur)
 {
+
+}
+
+int deplacementPion(struct s_partie* p)
+{
+
   int *depart = malloc(sizeof(int) *2);
+  char *departTxt = malloc(sizeof(char) *2);
   int *arrivee = malloc(sizeof(int) *2);
+  char *arriveeTxt = malloc(sizeof(char) *2);
   int *pionAdeplacer;
 
   pionAdeplacer = NULL;
 
   do
   {
-    printf("Choisissez votre pion : ");
-    depart = coordonneesVersEntier(demanderChaine(2));
-  } while(pionEJoueur(0,pions,depart));
+    printf("\nChoisissez votre pion : ");
+    departTxt = demanderChaine(2);
+    depart = coordonneesVersEntier(departTxt);
+  } while(pionEJoueur(p->tourJoueur,p->pionsJoueurs,depart));
 
-  pionAdeplacer = (int*) cherchePion(pions,depart);
+  pionAdeplacer = (int*) cherchePion(p->pionsJoueurs,depart);
 
   do
   {
     printf("Vers la case : ");
-    arrivee = coordonneesVersEntier(demanderChaine(2));
-  } while(mouvementPionPossible(plateau,pionAdeplacer,arrivee));
+    arriveeTxt = demanderChaine(2);
+    arrivee = coordonneesVersEntier(arriveeTxt);
+  } while(mouvementPionPossible(p->plateau,pionAdeplacer,arrivee));
 
 
 
-  if (!mouvementPionPossible(plateau,pionAdeplacer,arrivee) && !pionEJoueur(0,pions,pionAdeplacer))
+  if (!mouvementPionPossible(p->plateau,pionAdeplacer,arrivee) && !pionEJoueur(p->tourJoueur,p->pionsJoueurs,pionAdeplacer))
   {
-    movePion(plateau,pionAdeplacer,arrivee);
+    movePion(p->plateau,pionAdeplacer,arrivee);
+
+    minToMaj(departTxt);
+    minToMaj(arriveeTxt);
+    sprintf(p->dernierMouvement,"%s -> %s",departTxt,arriveeTxt);
+
     free(depart);
     free(arrivee);
     return 0;
   }
 }
 
-void afficheInfosJeu(int** plateau)
+void tour(struct s_partie* p)
 {
-  affichePlateau(plateau);
+  refreshPlateau(p->pionsJoueurs,p->plateau);
+  afficheInfosJeu(p);
+  deplacementPion(p);
+  //if pions autour, run encercle
+  p->compteurTour++;
+  p->tourJoueur = p->compteurTour % 2;
 }

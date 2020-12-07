@@ -22,5 +22,5 @@ chaine.o : CHAINE.c CHAINE.h
 hs_structures.o : HS_STRUCTURES.c HS_STRUCTURES.h
 	$(CC) -c HS_STRUCTURES.c $(CGFLAGS)
 
-hs_mecaniques.o : HS_MECANIQUES.c HS_MECANIQUES.h CHAINE.h
+hs_mecaniques.o : HS_MECANIQUES.c HS_MECANIQUES.h HS_STRUCTURES.h CHAINE.h
 	$(CC) -c HS_MECANIQUES.c $(CGFLAGS)

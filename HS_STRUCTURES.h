@@ -22,6 +22,8 @@ struct s_jeu
 };
 
 
+int** gen_plateau();
+int*** gen_pionsjoueur();
 struct s_jeu* initialisationJeu();
 struct s_partie* initialisationPartie();
 

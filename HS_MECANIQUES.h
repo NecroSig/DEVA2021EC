@@ -2,17 +2,17 @@
 
 #define HS_MECANIQUES
 
-int** gen_plateau();
+
 void affichePlateau(int **tab);
 void affichePionsJoueur(int*** tab);
-int*** gen_pionsjoueur();
 void refreshPlateau(int*** pionsJoueurs, int** plateau);
-int deplacementPion(int** plateau,int*** pions);
+int deplacementPion(struct s_partie* p);
 void movePion(int** plateau, int* depart, int* arrivee);
 int *cherchePion(int*** pionsJoueurs,int* coordonnees); //renvoie pointeur vers le pion
 int pionEJoueur(int nbJoueur,int*** pions, int* pionSelect);
 int mouvementPionPossible(int** plateau,int* depart, int* arrivee);
-void afficheInfosJeu(int** plateau); //fonction a développer
+void afficheInfosJeu(struct s_partie* p);
+void tour(struct s_partie* p);
 
 
 

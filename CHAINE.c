@@ -1,6 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+int longueur(char* string)
+{
+  if ( *string == '\0')
+    return 0;
+  else
+    return 1 + longueur(string + 1);
+}
+
+void recop(char* str1, char* str2)
+{
+   if ( *str1 == '\0' )
+   {
+     *str2 = '\0';
+     return;
+   }
+   *str2 = *str1;
+   return recop(str1 + 1, str2 + 1);
+}
+
+char* concat(char* str1, char* str2)
+{
+  recop(str2,str1 + longueur(str1));
+  return str1;
+}
 
 void minToMaj(char chaine[])
 {
