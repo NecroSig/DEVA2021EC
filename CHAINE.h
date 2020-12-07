@@ -10,6 +10,6 @@ int* coordonneesVersEntier(char* coordonnees);
 char* entierVersCoordonnees(int* coordonnees);
 char* demanderChaine(int nbCaracteres);
 void viderBuffer();
-
+char* extraction(char* src, int debut, int fin);
 
 #endif

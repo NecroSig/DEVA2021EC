@@ -20,6 +20,20 @@ void recop(char* str1, char* str2)
    return recop(str1 + 1, str2 + 1);
 }
 
+char* extraction(char* src, int debut, int fin)
+{
+  char *extract = NULL;
+  extract = malloc(sizeof(char)*(fin-debut));
+
+  int i = debut;
+  while (i <= fin)
+  {
+    extract[i-debut] = src[i];
+    i++;
+  }
+  return extract;
+}
+
 char* concat(char* str1, char* str2)
 {
   recop(str2,str1 + longueur(str1));
@@ -63,7 +77,9 @@ int* coordonneesVersEntier(char* coordonnees)
     *tab = -1;
     *(tab + 1) = -1;
   }
+
   //printf("sortie Char to int : [%d,%d]\n",tab[0],tab[1] );
+  free(coordonnees);
   return tab;
 }
 
@@ -79,6 +95,7 @@ char* entierVersCoordonnees(int* coordonnees)
   *(tab + 1) = (char) *(coordonnees + 1) +'0';
   *(tab + 2) = '\0';
 
+  free(coordonnees);
   return tab;
 }
 

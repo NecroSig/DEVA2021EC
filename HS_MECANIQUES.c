@@ -127,8 +127,23 @@ void afficheInfosJeu(struct s_partie* p)
   printf("Tour du joueur %d\n",p->tourJoueur + 1);
 
   if (p->compteurTour == 0){}
-  else { printf("Dernier coup joue : %s",p->dernierMouvement); }
+  else {
+    printf("Dernier coup joue : %s",p->dernierMouvement);
+
+  }
   affichePlateau(p->plateau);
+}
+
+int verifCase(int** plateau, int x, int y)
+{
+  if (x < 0 || x > 9 || y < 0 || y > 9 )
+  {
+    return 0;
+  }
+  else
+  {
+    return plateau[x][y];
+  }
 }
 
 void movePion(int** plateau, int* depart, int* arrivee)
@@ -223,11 +238,20 @@ int mouvementPionPossible(int** plateau,int* depart, int* arrivee)
   }
 }
 
-//quand le pion se déplace on check si il y a des pions ennemis autour 
-int encercle(int** plateau, int tourJoueur)
+//quand le pion se déplace on check si il y a des pions ennemis autour
+int encercle(int** plat, int tj, int*** pions, char* derMove)
 {
+  char* ptMove = extraction(derMove,6,8);
+  int* ptTab = coordonneesVersEntier(ptMove);
+  free(ptMove);
+  //check haut bas droite gauche
+  // il peut y avoir plusieurs captures en un coup donc pas de else
+  //haut
+  if (verifCase(plateau,ptTab[0],)s)
 
 }
+
+
 
 int deplacementPion(struct s_partie* p)
 {
@@ -267,8 +291,7 @@ int deplacementPion(struct s_partie* p)
     sprintf(p->dernierMouvement,"%s -> %s",departTxt,arriveeTxt);
 
     free(depart);
-    free(arrivee);
-    return 0;
+d    return 0;
   }
 }
 
