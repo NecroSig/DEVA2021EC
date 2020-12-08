@@ -27,7 +27,7 @@ void affichePionsJoueur(int*** tab)
   }
 }
 
-void affichePlateau(int **tab)
+void affichePlateau(int **tab, int tj)
 {
   int i,j,k;
   int nbLignes = 10;
@@ -62,11 +62,11 @@ void affichePlateau(int **tab)
         //if case == 1 affiche ami sinon ennemi sinon case vide
         if (tab[i][j] == 1)
         {
-          printf(" \\/ |");
+          !(tj == 0) ? printf(" \\/ |") : printf(" \\/*|");
         }
         else if (tab[i][j] == 2)
         {
-          printf(" /\\ |");
+          !(tj == 1) ? printf(" /\\ |") : printf(" /\\*|");
         }
         else if (j >= 9)
         {
@@ -122,7 +122,7 @@ int* cherchePion(int*** pionsJoueurs,int* coordonnees)
 
 void afficheInfosJeu(struct s_partie* p)
 {
-  CLEARSCREEN();
+  //CLEARSCREEN();
   printf("--- Tour : %2d ---\n\n",p->compteurTour + 1 );
   printf("Tour du joueur %d\n",p->tourJoueur + 1);
 
@@ -131,7 +131,7 @@ void afficheInfosJeu(struct s_partie* p)
     printf("Dernier coup joue : %s",p->dernierMouvement);
 
   }
-  affichePlateau(p->plateau);
+  affichePlateau(p->plateau,p->tourJoueur);
 }
 
 int verifCase(int** plateau, int x, int y)
@@ -238,20 +238,78 @@ int mouvementPionPossible(int** plateau,int* depart, int* arrivee)
   }
 }
 
-//quand le pion se déplace on check si il y a des pions ennemis autour
-int encercle(int** plat, int tj, int*** pions, char* derMove)
+void capture(int*** pions,int* coor)
 {
-  char* ptMove = extraction(derMove,6,8);
-  int* ptTab = coordonneesVersEntier(ptMove);
-  free(ptMove);
-  //check haut bas droite gauche
-  // il peut y avoir plusieurs captures en un coup donc pas de else
-  //haut
-  if (verifCase(plateau,ptTab[0],)s)
+  int* pionCapture = cherchePion(pions,coor);
+  pionCapture[0] = -1;
+  pionCapture[1] = -1;
 
+  //add pions capture pour le joueur
 }
 
+//quand le pion se déplace on check si il y a des pions ennemis autour
+void encercle(int** plat, int tj, int*** pions, char* derMove)
+{
+  int i;
+  char* ptMove = extraction(derMove,6,8);
+  int* coor = coordonneesVersEntier(ptMove);
+  int* coorCap = malloc(sizeof(int) * 2);
 
+
+  if (verifCase(plat,coor[0]+1,coor[1]) != tj+1 && verifCase(plat,coor[0]+1,coor[1]) != 0 )
+  {
+    i = coor[0] + 1;
+    while (verifCase(plat,i,coor[1]) != tj+1 && verifCase(plat,i,coor[1]) != 0) {
+      i++;
+    }
+    if (verifCase(plat,i,coor[1]) == tj+1)
+    {
+      coorCap[0] = i;
+      coorCap[1] = coor[1]+1;
+      capture(pions,coorCap);
+      printf("Capture vers la bas !\n");
+    }
+  }
+
+  if (verifCase(plat,coor[0]-1,coor[1]) != tj+1 && verifCase(plat,coor[0]-1,coor[1]) != 0 )
+  {
+    i = coor[0] - 1;
+    while (verifCase(plat,i,coor[1]) != tj+1 && verifCase(plat,i,coor[1]) != 0) {
+      i--;
+    }
+    if (verifCase(plat,i,coor[1]) == tj+1)
+    {
+      printf("Capture vers la haut !\n");
+    }
+  }
+
+  if (verifCase(plat,coor[0],coor[1]+1) != tj+1 && verifCase(plat,coor[0],coor[1]+1) != 0 )
+  {
+    i = coor[1] + 1;
+    while (verifCase(plat,coor[0],i) != tj+1 && verifCase(plat,coor[0],i) != 0) {
+      i++;
+    }
+    if (verifCase(plat,coor[0],i) == tj+1)
+    {
+      printf("Capture vers le droite !\n");
+    }
+  }
+
+  if (verifCase(plat,coor[0],coor[1]-1) != tj+1 && verifCase(plat,coor[0],coor[1]-1) != 0 )
+  {
+    i = coor[1] - 1;
+    while (verifCase(plat,coor[0],i) != tj+1 && verifCase(plat,coor[0],i) != 0) {
+      i--;
+    }
+    if (verifCase(plat,coor[0],i) == tj+1)
+    {
+      printf("Capture vers le gauche !\n");
+    }
+  }
+
+  free(ptMove);
+  free(coor);
+}
 
 int deplacementPion(struct s_partie* p)
 {
@@ -291,7 +349,7 @@ int deplacementPion(struct s_partie* p)
     sprintf(p->dernierMouvement,"%s -> %s",departTxt,arriveeTxt);
 
     free(depart);
-d    return 0;
+    return 0;
   }
 }
 
@@ -300,7 +358,9 @@ void tour(struct s_partie* p)
   refreshPlateau(p->pionsJoueurs,p->plateau);
   afficheInfosJeu(p);
   deplacementPion(p);
-  //if pions autour, run encercle
+  encercle(p->plateau,p->tourJoueur,p->pionsJoueurs,p->dernierMouvement);
+
+
   p->compteurTour++;
   p->tourJoueur = p->compteurTour % 2;
 }

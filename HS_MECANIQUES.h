@@ -3,7 +3,7 @@
 #define HS_MECANIQUES
 
 
-void affichePlateau(int **tab);
+void affichePlateau(int **tab,int tj);
 void affichePionsJoueur(int*** tab);
 void refreshPlateau(int*** pionsJoueurs, int** plateau);
 int deplacementPion(struct s_partie* p);
