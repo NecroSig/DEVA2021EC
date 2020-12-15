@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 int longueur(char* string)
 {
   if ( *string == '\0')
@@ -8,6 +9,20 @@ int longueur(char* string)
   else
     return 1 + longueur(string + 1);
 }
+
+int compare(char* str1, char* str2)
+{
+  if (*str1 == '\0' && *str2 == '\0' )
+  {
+    return 1;
+  }
+  if (*str1 != *str2)
+  {
+    return 0;
+  }
+  return compare(str1 + 1,str2 + 1);
+}
+
 
 void recop(char* str1, char* str2)
 {
@@ -89,13 +104,10 @@ char* entierVersCoordonnees(int* coordonnees)
   tab = malloc(sizeof(char)*3);
   if (tab == NULL) {exit(0);}
 
-  //A AJOUTER : Reconnaissance de la lettre et du chiffre
-
-  *tab = (char) *coordonnees + 'A' - 1;
-  *(tab + 1) = (char) *(coordonnees + 1) +'0';
+  *tab = (char) *(coordonnees+1) + 'A';
+  *(tab + 1) = (char) *(coordonnees) +'0' + 1;
   *(tab + 2) = '\0';
 
-  free(coordonnees);
   return tab;
 }
 

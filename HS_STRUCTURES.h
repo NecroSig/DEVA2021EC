@@ -4,9 +4,10 @@
 
 struct s_partie
 {
+  int save;
   int tourJoueur; // 0=J1, 1=J2
   int compteurTour;
-  int *pionsCaptures; //[nbPionsJ1,nbPionsJ2]
+  int *pionsRestants; //[nbPionsJ1,nbPionsJ2]
   int **plateau;
   int ***pionsJoueurs; //[ [ [1,1],[1,2] ] [ [9,1][9,2] ] ]
   char *dernierMouvement; //Format : A2 -> D2
@@ -27,6 +28,6 @@ int*** gen_pionsjoueur();
 struct s_jeu* initialisationJeu();
 struct s_partie* initialisationPartie();
 
-int deconstructionJeu(struct s_jeu* instance);
+void deconstructionPartie(struct s_partie* instance);
 
 #endif

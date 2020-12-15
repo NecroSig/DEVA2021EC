@@ -13,6 +13,111 @@
 #endif
 
 
+void logF(char* txt)
+{
+  FILE *f;
+  f = fopen("log.log", "a+");
+  if (f == NULL) { exit(0);}
+  fprintf(f,"%s \n",txt);
+  fclose(f);
+}
+
+int victoire(int* pionsR, int tJ)
+{
+  if (pionsR[( (tJ == 0) ? 1 : 0 )] < 2)
+  {
+    return 1;
+  }
+  return 0;
+}
+
+int sauvegarde(char* nomFichier,struct s_jeu* jeu)
+{
+  int i;
+  int j;
+  FILE* fichier = NULL;
+  fichier = fopen(nomFichier,"w+");
+
+  if (fichier != NULL)
+  {
+    //S_jeu
+    fprintf(fichier,"%d %d",jeu->solo,jeu->difficulte);
+
+    //s_partie
+    fprintf(fichier," %d %d %d %d ",
+      jeu->partie->tourJoueur,
+      jeu->partie->compteurTour,
+      jeu->partie->pionsRestants[0],
+      jeu->partie->pionsRestants[1]);
+
+    //inutile de sauvegarder le plateau avec le rafraichissement de plateau
+
+    for (i=0; i<2;i++)
+    {
+      for (j=0; j<9; j++)
+      {
+        fprintf(fichier,"[%d,%d]",
+        jeu->partie->pionsJoueurs[i][j][0],
+        jeu->partie->pionsJoueurs[i][j][1]);
+      }
+    }
+    fprintf(fichier,"%s",jeu->partie->dernierMouvement);
+    fclose(fichier);
+  }
+  else
+  {
+    printf("Impossible d'ouvrir le fichier %s",nomFichier);
+    return 1;
+  }
+
+  return 0;
+}
+
+int chargement(char* nomFichier, struct s_jeu* jeu)
+{
+  int i;
+  int j;
+  FILE* fichier = NULL;
+  fichier = fopen(nomFichier,"r");
+
+  if (fichier != NULL)
+  {
+    fscanf(fichier,"%d %d",&jeu->solo,&jeu->difficulte);
+    fscanf(fichier," %d %d %d %d ",
+      &jeu->partie->tourJoueur,
+      &jeu->partie->compteurTour,
+      &jeu->partie->pionsRestants[0],
+      &jeu->partie->pionsRestants[1]);
+
+    for (i=0; i<2;i++)
+    {
+      for (j=0; j<9; j++)
+      {
+        fscanf(fichier,"[%d,%d]",
+          &jeu->partie->pionsJoueurs[i][j][0],
+          &jeu->partie->pionsJoueurs[i][j][1]);
+      }
+    }
+    fgets(jeu->partie->dernierMouvement,9,fichier);
+
+    fclose(fichier);
+    return 0;
+  }
+  else
+  {
+    printf("Impossible d'ouvrir le fichier %s",nomFichier);
+    return 1;
+  }
+}
+
+char* demanderNomJoueur(char* playername, int nbJoueur)
+{
+  printf("\nNom du joueur %d : ", nbJoueur);
+  playername = demanderChaine(10);
+  logF(playername);
+  return playername;
+}
+
 void affichePionsJoueur(int*** tab)
 {
   int i;
@@ -62,11 +167,11 @@ void affichePlateau(int **tab, int tj)
         //if case == 1 affiche ami sinon ennemi sinon case vide
         if (tab[i][j] == 1)
         {
-          !(tj == 0) ? printf(" \\/ |") : printf(" \\/*|");
+          !(tj == 0) ? printf(" /\\ |") : printf(" /\\*|");
         }
         else if (tab[i][j] == 2)
         {
-          !(tj == 1) ? printf(" /\\ |") : printf(" /\\*|");
+          !(tj == 1) ? printf(" \\/ |") : printf(" \\/*|");
         }
         else if (j >= 9)
         {
@@ -84,21 +189,25 @@ void affichePlateau(int **tab, int tj)
 
 void refreshPlateau(int*** pionsJoueurs, int** plateau)
 {
+  logF("f_refreshPlateau : 1 / 2");
+  //fonction a remettre au gout du jour
   int i; int j;
   for (i=0; i<2;i++)
   {
     for (j=0; j<9; j++)
     {
-      if (i == 0)
+      if (i == 0 && pionsJoueurs[i][j][0] >= 0 && pionsJoueurs[i][j][0] <= 9)
       {
         plateau[pionsJoueurs[i][j][0]][pionsJoueurs[i][j][1]] = 1;
       }
-      else if (i == 1)
+      else if (i == 1 && pionsJoueurs[i][j][0] >= 0 && pionsJoueurs[i][j][0] <= 9)
       {
         plateau[pionsJoueurs[i][j][0]][pionsJoueurs[i][j][1]] = 2;
       }
     }
   }
+
+  logF("f_refreshPlateau : 2 / 2");
 }
 
 int* cherchePion(int*** pionsJoueurs,int* coordonnees)
@@ -120,18 +229,40 @@ int* cherchePion(int*** pionsJoueurs,int* coordonnees)
   return NULL;
 }
 
+int chercheNumPion(int*** pionsJoueurs,int* coordonnees)
+{
+  int i;
+  int j;
+
+  for (i=0; i<2;i++)
+  {
+    for (j=0; j<9; j++)
+    {
+      if (pionsJoueurs[i][j][0] == coordonnees[0] && pionsJoueurs[i][j][1] == coordonnees[1])
+      {
+        //printf("--- \nSortie Cherche pion\n---\n");
+        return j;
+      }
+    }
+  }
+  return -1;
+}
+
 void afficheInfosJeu(struct s_partie* p)
 {
-  //CLEARSCREEN();
+  CLEARSCREEN();
   printf("--- Tour : %2d ---\n\n",p->compteurTour + 1 );
-  printf("Tour du joueur %d\n",p->tourJoueur + 1);
+  printf("Tour du joueur %d \n",p->tourJoueur + 1);
+  printf("Pions restants : %d\n",p->pionsRestants[p->tourJoueur] );
 
-  if (p->compteurTour == 0){}
+  if (p->compteurTour == 0){viderBuffer();}
   else {
-    printf("Dernier coup joue : %s",p->dernierMouvement);
+    printf("\nDernier coup joue : %s",p->dernierMouvement);
 
   }
   affichePlateau(p->plateau,p->tourJoueur);
+  printf("\n");
+  logF(" 2 / 4 : Infos affichées");
 }
 
 int verifCase(int** plateau, int x, int y)
@@ -238,82 +369,115 @@ int mouvementPionPossible(int** plateau,int* depart, int* arrivee)
   }
 }
 
-void capture(int*** pions,int* coor)
+void capture(int** plt,int*** pions, int tj, int *pionsRestants, int* coor)
 {
-  int* pionCapture = cherchePion(pions,coor);
-  pionCapture[0] = -1;
-  pionCapture[1] = -1;
+  int numPionCapture = chercheNumPion(pions,coor);
+  int numJoueur = 0;
+  numJoueur =  (tj == 0) ? 1 : 0;
 
-  //add pions capture pour le joueur
+  plt[pions[numJoueur][numPionCapture][0]][pions[numJoueur][numPionCapture][1]] = 0;
+
+  pions[numJoueur][numPionCapture][0] = -1;
+  pions[numJoueur][numPionCapture][1] = -1;
+
+  pionsRestants[numJoueur]--;
 }
 
-//quand le pion se déplace on check si il y a des pions ennemis autour
-void encercle(int** plat, int tj, int*** pions, char* derMove)
+void encercle(struct s_partie* p)
 {
   int i;
-  char* ptMove = extraction(derMove,6,8);
-  int* coor = coordonneesVersEntier(ptMove);
+  char* ptMove = extraction(p->dernierMouvement,longueur(p->dernierMouvement)-2,longueur(p->dernierMouvement));
+  int* coor = coordonneesVersEntier(ptMove); //coor pion qui s'est deplacé
   int* coorCap = malloc(sizeof(int) * 2);
 
-
-  if (verifCase(plat,coor[0]+1,coor[1]) != tj+1 && verifCase(plat,coor[0]+1,coor[1]) != 0 )
+  //Si la valeur de la case y+1 du plateau par rapport a notre pion ne correspond pas a un pion de notre joueur et que la case n'est pas vide
+  if (verifCase(p->plateau,coor[0]+1,coor[1]) != ( (p->tourJoueur == 0) ? 1 : 2 ) && verifCase(p->plateau,coor[0]+1,coor[1]) != 0 )
   {
-    i = coor[0] + 1;
-    while (verifCase(plat,i,coor[1]) != tj+1 && verifCase(plat,i,coor[1]) != 0) {
+    i = coor[0] + 1; // cela veut dire que le pion est peut être encerclé donc on continu
+    while (verifCase(p->plateau,i,coor[1]) != ( (p->tourJoueur == 0) ? 1 : 2 ) && verifCase(p->plateau,i,coor[1]) != 0) {
       i++;
     }
-    if (verifCase(plat,i,coor[1]) == tj+1)
+    if (verifCase(p->plateau,i,coor[1]) == ( (p->tourJoueur == 0) ? 1 : 2 ))
     {
-      coorCap[0] = i;
-      coorCap[1] = coor[1]+1;
-      capture(pions,coorCap);
-      printf("Capture vers la bas !\n");
+      // si il y a bien un point joueur au bout, les pions sont encerclés et doivent être capturés
+      coorCap[1] = coor[1];
+
+      while (i != coor[0]+1)
+      {
+        coorCap[0] = i - 1;
+        capture(p->plateau,p->pionsJoueurs,p->tourJoueur,p->pionsRestants,coorCap);
+        i--;
+      }
     }
   }
-
-  if (verifCase(plat,coor[0]-1,coor[1]) != tj+1 && verifCase(plat,coor[0]-1,coor[1]) != 0 )
+  //bas
+  if (verifCase(p->plateau,coor[0]-1,coor[1]) != ( (p->tourJoueur == 0) ? 1 : 2 ) && verifCase(p->plateau,coor[0]-1,coor[1]) != 0 )
   {
     i = coor[0] - 1;
-    while (verifCase(plat,i,coor[1]) != tj+1 && verifCase(plat,i,coor[1]) != 0) {
+    while (verifCase(p->plateau,i,coor[1]) != ( (p->tourJoueur == 0) ? 1 : 2 ) && verifCase(p->plateau,i,coor[1]) != 0) {
       i--;
     }
-    if (verifCase(plat,i,coor[1]) == tj+1)
+    if (verifCase(p->plateau,i,coor[1]) == ( (p->tourJoueur == 0) ? 1 : 2 ))
     {
-      printf("Capture vers la haut !\n");
+      coorCap[1] = coor[1];
+
+      while (i != coor[0] - 1)
+      {
+        coorCap[0] = i + 1;
+        capture(p->plateau,p->pionsJoueurs,p->tourJoueur,p->pionsRestants,coorCap);
+        i++;
+      }
     }
   }
-
-  if (verifCase(plat,coor[0],coor[1]+1) != tj+1 && verifCase(plat,coor[0],coor[1]+1) != 0 )
+  //droite
+  if (verifCase(p->plateau,coor[0],coor[1]+1) != ( (p->tourJoueur == 0) ? 1 : 2 ) && verifCase(p->plateau,coor[0],coor[1]+1) != 0 )
   {
     i = coor[1] + 1;
-    while (verifCase(plat,coor[0],i) != tj+1 && verifCase(plat,coor[0],i) != 0) {
+    while (verifCase(p->plateau,coor[0],i) != ( (p->tourJoueur == 0) ? 1 : 2 ) && verifCase(p->plateau,coor[0],i) != 0) {
       i++;
     }
-    if (verifCase(plat,coor[0],i) == tj+1)
+    if (verifCase(p->plateau,coor[0],i) == ( (p->tourJoueur == 0) ? 1 : 2 ))
     {
-      printf("Capture vers le droite !\n");
+      coorCap[0] = coor[0];
+
+      while (i != coor[1]+1)
+      {
+        coorCap[1] = i - 1;
+        capture(p->plateau,p->pionsJoueurs,p->tourJoueur,p->pionsRestants,coorCap);
+        i--;
+      }
     }
   }
-
-  if (verifCase(plat,coor[0],coor[1]-1) != tj+1 && verifCase(plat,coor[0],coor[1]-1) != 0 )
+  //gauche
+  if (verifCase(p->plateau,coor[0],coor[1]-1) != ( (p->tourJoueur == 0) ? 1 : 2 ) && verifCase(p->plateau,coor[0],coor[1]-1) != 0 )
   {
     i = coor[1] - 1;
-    while (verifCase(plat,coor[0],i) != tj+1 && verifCase(plat,coor[0],i) != 0) {
+    while (verifCase(p->plateau,coor[0],i) != ( (p->tourJoueur == 0) ? 1 : 2 ) && verifCase(p->plateau,coor[0],i) != 0) {
       i--;
     }
-    if (verifCase(plat,coor[0],i) == tj+1)
+    if (verifCase(p->plateau,coor[0],i) == ( (p->tourJoueur == 0) ? 1 : 2 ) )
     {
-      printf("Capture vers le gauche !\n");
+
+      while (i != coor[1]-1)
+      {
+
+        coorCap[0] = coor[0];
+        coorCap[1] = i + 1;
+        capture(p->plateau,p->pionsJoueurs,p->tourJoueur,p->pionsRestants,coorCap);
+        i++;
+      }
+
     }
   }
 
   free(ptMove);
   free(coor);
+
+  logF("4 / 4 : Encercle");
 }
 
 int deplacementPion(struct s_partie* p)
 {
-
   int *depart = malloc(sizeof(int) *2);
   char *departTxt = malloc(sizeof(char) *2);
   int *arrivee = malloc(sizeof(int) *2);
@@ -326,17 +490,22 @@ int deplacementPion(struct s_partie* p)
   {
     printf("\nChoisissez votre pion : ");
     departTxt = demanderChaine(2);
+
+    if (compare(departTxt,"00"))
+    {
+      p->save = 1;
+      return 1;
+    }
+
     depart = coordonneesVersEntier(departTxt);
+
   } while(pionEJoueur(p->tourJoueur,p->pionsJoueurs,depart));
 
   pionAdeplacer = (int*) cherchePion(p->pionsJoueurs,depart);
 
-  do
-  {
-    printf("Vers la case : ");
-    arriveeTxt = demanderChaine(2);
-    arrivee = coordonneesVersEntier(arriveeTxt);
-  } while(mouvementPionPossible(p->plateau,pionAdeplacer,arrivee));
+  printf("Vers la case : ");
+  arriveeTxt = demanderChaine(2);
+  arrivee = coordonneesVersEntier(arriveeTxt);
 
 
 
@@ -349,18 +518,31 @@ int deplacementPion(struct s_partie* p)
     sprintf(p->dernierMouvement,"%s -> %s",departTxt,arriveeTxt);
 
     free(depart);
+
     return 0;
   }
 }
 
-void tour(struct s_partie* p)
+void tour(struct s_jeu* j)
 {
-  refreshPlateau(p->pionsJoueurs,p->plateau);
-  afficheInfosJeu(p);
-  deplacementPion(p);
-  encercle(p->plateau,p->tourJoueur,p->pionsJoueurs,p->dernierMouvement);
 
+    logF("Debut du tour");
 
-  p->compteurTour++;
-  p->tourJoueur = p->compteurTour % 2;
+    refreshPlateau(j->partie->pionsJoueurs,j->partie->plateau);
+
+    do {
+      afficheInfosJeu(j->partie);
+    }
+    while(deplacementPion(j->partie) && j->partie->save != 1);
+
+    if (j->partie->save == 1)
+    {
+      sauvegarde("save",j);
+      return;
+    }
+
+    if (j->partie->compteurTour <= 1) {}
+    else{ encercle(j->partie); }
+
+    logF("Fin du tour");
 }

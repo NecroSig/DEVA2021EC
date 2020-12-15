@@ -1,10 +1,13 @@
 #include <stdlib.h>
+#include <stdio.h>
+
 
 struct s_partie
 {
+  int save;
   int tourJoueur; // 0=J1, 1=J2
   int compteurTour;
-  int *pionsCaptures; //[nbPionsJ1,nbPionsJ2]
+  int *pionsRestants; //[nbPionsJ1,nbPionsJ2]
   int **plateau;
   int ***pionsJoueurs; //[ [ [1,1],[1,2] ] [ [9,1][9,2] ] ]
   char *dernierMouvement; //Format : A2 -> D2
@@ -18,35 +21,6 @@ struct s_jeu
   char **playerNames; //["Trevor","Bryan"]
   struct s_partie *partie;
 };
-
-
-struct s_jeu* initialisationJeu()
-{
-  //Malloc à rajouter
-  struct s_jeu* jeu = malloc(sizeof(struct s_jeu));
-  if (jeu == NULL) {exit(0);}
-
-  jeu -> solo = 2;
-  jeu -> difficulte = 0;
-  jeu -> nameFile = NULL;
-  jeu -> playerNames = NULL;
-  jeu -> partie = NULL;
-
-  return jeu;
-}
-
-struct s_partie* initialisationPartie()
-{
-  struct s_partie* partie = malloc(sizeof(struct s_partie));
-  if (partie == NULL) {exit(0);}
-
-  partie -> tourJoueur = 0;
-  partie -> compteurTour = 0;
-  partie -> pionsCaptures = NULL;
-  partie -> plateau = NULL;
-  partie -> pionsJoueurs = NULL;
-  partie -> dernierMouvement = malloc(sizeof(char)*8);
-}
 
 int** gen_plateau()
 {
@@ -101,12 +75,12 @@ int*** gen_pionsjoueur()
     for (j=0; j<9; j++)
     {
       //A partir de là il faut les placer sur le plateau à leur position initiale
-      if (i == 0)
+      if (i == 1)
       {
         pionsJoueur[i][j][0] = 0;
         pionsJoueur[i][j][1] = j;
       }
-      else if (i == 1)
+      else if (i == 0)
       {
         pionsJoueur[i][j][0] = 8;
         pionsJoueur[i][j][1] = j;
@@ -117,11 +91,73 @@ int*** gen_pionsjoueur()
 }
 
 
-int deconstructionJeu(struct s_jeu* instance)
+void deconstructionPartie(struct s_partie* instance)
 {
-  if (instance->playerNames != NULL)
+  int i;
+  int j;
+
+  free(instance->pionsRestants);
+
+  //Plateau
+  for ( i = 0 ; i < 10 ; i++ )
   {
-    free(instance->playerNames);
+    free(instance->plateau[i]);
   }
+  free(instance->plateau);
+
+  //pionsJoueurs
+  for (i=0; i<2;i++)
+  {
+    for (j=0; j<9; j++)
+    {
+      free(instance->pionsJoueurs[i][j]);
+    }
+  }
+  for (i=0; i<2 ;i++)
+  {
+    free(instance->pionsJoueurs[i]);
+  }
+  free(instance->pionsJoueurs);
+
+  free(instance->dernierMouvement);
+
   free(instance);
+}
+
+
+struct s_jeu* initialisationJeu()
+{
+  //Malloc à rajouter
+  struct s_jeu* jeu = malloc(sizeof(struct s_jeu));
+  if (jeu == NULL) {exit(0);}
+
+  jeu -> solo = 2;
+  jeu -> difficulte = 0;
+  jeu -> nameFile = NULL;
+  jeu -> playerNames = malloc(sizeof(char*)*2);
+  jeu -> partie = NULL;
+
+  jeu -> playerNames[0] = malloc(sizeof(char)*10);
+  jeu -> playerNames[1] = malloc(sizeof(char)*10);
+
+  return jeu;
+}
+
+struct s_partie* initialisationPartie()
+{
+  struct s_partie* partie = malloc(sizeof(struct s_partie));
+  if (partie == NULL) {exit(0);}
+
+  partie -> save = 0;
+  partie -> tourJoueur = 0;
+  partie -> compteurTour = 0;
+  partie -> pionsRestants = malloc(sizeof(int)*2);
+  partie -> plateau = gen_plateau();
+  partie -> pionsJoueurs = gen_pionsjoueur();
+  partie -> dernierMouvement = malloc(sizeof(char)*9);
+
+  partie -> pionsRestants[0] = 9;
+  partie -> pionsRestants[1] = 9;
+
+  return partie;
 }
