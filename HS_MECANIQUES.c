@@ -31,6 +31,20 @@ int victoire(int* pionsR, int tJ)
   return 0;
 }
 
+void affichePionsJoueur(int*** tab)
+{
+  int i;
+  int j;
+  for (i = 0; i < 2; i++)
+  {
+    for (j=0; j<9; j++)
+    {
+      printf("TAB[%d][%d] = [%d,%d]  \n",i,j,(tab[i][j][0]),(tab[i][j][1]));
+    }
+    printf("\n");
+  }
+}
+
 int sauvegarde(char* nomFichier,struct s_jeu* jeu)
 {
   int i;
@@ -51,7 +65,6 @@ int sauvegarde(char* nomFichier,struct s_jeu* jeu)
       jeu->partie->pionsRestants[1]);
 
     //inutile de sauvegarder le plateau avec le rafraichissement de plateau
-
     for (i=0; i<2;i++)
     {
       for (j=0; j<9; j++)
@@ -101,6 +114,7 @@ int chargement(char* nomFichier, struct s_jeu* jeu)
     fgets(jeu->partie->dernierMouvement,9,fichier);
 
     fclose(fichier);
+    viderBuffer();
     return 0;
   }
   else
@@ -116,20 +130,6 @@ char* demanderNomJoueur(char* playername, int nbJoueur)
   playername = demanderChaine(10);
   logF(playername);
   return playername;
-}
-
-void affichePionsJoueur(int*** tab)
-{
-  int i;
-  int j;
-  for (i = 0; i < 2; i++)
-  {
-    for (j=0; j<9; j++)
-    {
-      printf("TAB[%d][%d] = [%d,%d]  \n",i,j,(tab[i][j][0]),(tab[i][j][1]));
-    }
-    printf("\n");
-  }
 }
 
 void affichePlateau(int **tab, int tj)
@@ -250,7 +250,7 @@ int chercheNumPion(int*** pionsJoueurs,int* coordonnees)
 
 void afficheInfosJeu(struct s_partie* p)
 {
-  CLEARSCREEN();
+  //CLEARSCREEN();
   printf("--- Tour : %2d ---\n\n",p->compteurTour + 1 );
   printf("Tour du joueur %d \n",p->tourJoueur + 1);
   printf("Pions restants : %d\n",p->pionsRestants[p->tourJoueur] );
