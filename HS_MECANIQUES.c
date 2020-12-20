@@ -3,7 +3,6 @@
 #include "HS_STRUCTURES.h"
 #include "CHAINE.h"
 
-
 #if _WIN32
     #define CLEARSCREEN(); system("cls");
   #elif __LINUX__
@@ -383,6 +382,19 @@ void capture(int** plt,int*** pions, int tj, int *pionsRestants, int* coor)
   pionsRestants[numJoueur]--;
 }
 
+int pionDansLePlateau(int x, int y)
+{
+  if (x > 8 || x < 0 || y > 8 || y < 0)
+  {
+    return 0;
+  }
+  else
+  {
+    return 1;
+  }
+}
+
+
 void encercle(struct s_partie* p)
 {
   int i;
@@ -457,16 +469,13 @@ void encercle(struct s_partie* p)
     }
     if (verifCase(p->plateau,coor[0],i) == ( (p->tourJoueur == 0) ? 1 : 2 ) )
     {
-
       while (i != coor[1]-1)
       {
-
         coorCap[0] = coor[0];
         coorCap[1] = i + 1;
         capture(p->plateau,p->pionsJoueurs,p->tourJoueur,p->pionsRestants,coorCap);
         i++;
       }
-
     }
   }
 
@@ -525,7 +534,6 @@ int deplacementPion(struct s_partie* p)
 
 void tour(struct s_jeu* j)
 {
-
     logF("Debut du tour");
 
     refreshPlateau(j->partie->pionsJoueurs,j->partie->plateau);
@@ -545,4 +553,199 @@ void tour(struct s_jeu* j)
     else{ encercle(j->partie); }
 
     logF("Fin du tour");
+}
+
+//Partie IA
+
+int numEnnemiAutour(int tJ, int* coor, int** plateau)
+{
+  int sum = 0;
+  sum += ( verifCase(plateau,coor[0]+1,coor[1]) == (tJ == 0) ? 2 : 1 ) ? 1 : 0 ;
+  sum += ( verifCase(plateau,coor[0]-1,coor[1]) == (tJ == 0) ? 2 : 1 ) ? 1 : 0 ;
+  sum += ( verifCase(plateau,coor[0],coor[1]+1) == (tJ == 0) ? 2 : 1 ) ? 1 : 0 ;
+  sum += ( verifCase(plateau,coor[0],coor[1]-1) == (tJ == 0) ? 2 : 1 ) ? 1 : 0 ;
+
+  return sum;
+}
+
+int parcoursPossible(int* coor, int** plateau, int tJ) //parcours le terrain dans les 4 directions
+{
+  int i;
+  int valeurVoulue = (tJ == 0) ? 1 : 2;
+  // haut
+  if (verifCase(plateau,coor[0]+1,coor[1]) == 0 && pionDansLePlateau(coor[0]+1,coor[1]) )
+  {
+    i = coor[0] + 1;
+    while (verifCase(plateau,i,coor[1]) == 0 && pionDansLePlateau(coor[0]+1,coor[1]) ) { i++; }
+    if (verifCase(plateau,i,coor[1]) == valeurVoulue )
+    {
+      return 1;
+    }
+  }
+  // bas
+  if (verifCase(plateau,coor[0]-1,coor[1]) == 0 && pionDansLePlateau(coor[0]-1,coor[1])  )
+  {
+    i = coor[0] - 1;
+    while (verifCase(plateau,i,coor[1]) == 0 && pionDansLePlateau(i,coor[1])) { i--; }
+    if (verifCase(plateau,i,coor[1]) == valeurVoulue )
+    {
+      return 1;
+    }
+  }
+  // droite
+  if (verifCase(plateau,coor[0],coor[1]+1) == 0 && pionDansLePlateau(coor[0],coor[1]+1) )
+  {
+    i = coor[1] + 1;
+    while (verifCase(plateau,coor[0],i) == 0 && pionDansLePlateau(coor[0],i) ) { i++; }
+    if (verifCase(plateau,coor[0],i) == valeurVoulue )
+    {
+      return 1;
+    }
+  }
+  // gauche
+  if (verifCase(plateau,coor[0],coor[1]-1) == 0 && pionDansLePlateau(coor[0],coor[1]-1) )
+  {
+    i = coor[1] - 1;
+    while (verifCase(plateau,coor[0],i) == 0 && pionDansLePlateau(coor[0],i) ) { i++; }
+    if (verifCase(plateau,coor[0],i) == valeurVoulue )
+    {
+      return 1;
+    }
+    return 0;
+  }
+}
+
+int* parcoursPossibleReturnCoorPion(int* coor, int** plateau, int tJ)
+{
+  int i;
+  int valeurVoulue = (tJ == 0) ? 1 : 2;
+  int* coorV = malloc(sizeof(int)*2);
+  // haut
+  if (verifCase(plateau,coor[0]+1,coor[1]) == 0 && pionDansLePlateau(coor[0]+1,coor[1]) )
+  {
+    i = coor[0] + 1;
+    while (verifCase(plateau,i,coor[1]) == 0 && pionDansLePlateau(coor[0]+1,coor[1]) ) { i++; }
+    if (verifCase(plateau,i,coor[1]) == valeurVoulue )
+    {
+      coorV[0] = i;
+      coorV[1] = coor[1];
+      return coorV;
+    }
+  }
+  // bas
+  if (verifCase(plateau,coor[0]-1,coor[1]) == 0 && pionDansLePlateau(coor[0]-1,coor[1])  )
+  {
+    i = coor[0] - 1;
+    while (verifCase(plateau,i,coor[1]) == 0 && pionDansLePlateau(i,coor[1])) { i--; }
+    if (verifCase(plateau,i,coor[1]) == valeurVoulue )
+    {
+      coorV[0] = i;
+      coorV[1] = coor[1];
+      return coorV;
+    }
+  }
+  // droite
+  if (verifCase(plateau,coor[0],coor[1]+1) == 0 && pionDansLePlateau(coor[0],coor[1]+1) )
+  {
+    i = coor[1] + 1;
+    while (verifCase(plateau,coor[0],i) == 0 && pionDansLePlateau(coor[0],i) ) { i++; }
+    if (verifCase(plateau,coor[0],i) == valeurVoulue )
+    {
+      coorV[0] = coor[0];
+      coorV[1] = i;
+      return coorV;
+    }
+  }
+  // gauche
+  if (verifCase(plateau,coor[0],coor[1]-1) == 0 && pionDansLePlateau(coor[0],coor[1]-1) )
+  {
+    i = coor[1] - 1;
+    while (verifCase(plateau,coor[0],i) == 0 && pionDansLePlateau(coor[0],i) ) { i++; }
+    if (verifCase(plateau,coor[0],i) == valeurVoulue )
+    {
+      coorV[0] = coor[0];
+      coorV[1] = i;
+      return coorV;
+    }
+  }
+}
+
+int** prochaineCaseVide(int** plateau, int** tab,int tJ , int num, int* coor)
+{
+  int i;
+  int j = 0;
+  // haut
+  if (verifCase(plateau,coor[0]+1,coor[1]) != ( (tJ == 0) ? 1 : 2 ) && verifCase(plateau,coor[0]+1,coor[1]) != 0 )
+  {
+    i = coor[0] + 1;
+    while (verifCase(plateau,i,coor[1]) != ( (tJ == 0) ? 1 : 2 ) && verifCase(plateau,i,coor[1]) != 0) { i++; }
+    if (verifCase(plateau,i,coor[1]) == 0 )
+    {
+      tab[j][0] = i;
+      tab[j][1] = coor[1];
+      j++;
+    }
+  }
+  // bas
+  if (verifCase(plateau,coor[0]-1,coor[1]) != ( (tJ == 0) ? 1 : 2 ) && verifCase(plateau,coor[0]-1,coor[1]) != 0 )
+  {
+    i = coor[0] - 1;
+    while (verifCase(plateau,i,coor[1]) != ( (tJ == 0) ? 1 : 2 ) && verifCase(plateau,i,coor[1]) != 0) { i--; }
+    if (verifCase(plateau,i,coor[1]) == 0 )
+    {
+      tab[j][0] = i;
+      tab[j][1] = coor[1];
+      j++;
+    }
+  }
+  // droite
+  if (verifCase(plateau,coor[0],coor[1]+1) != ( (tJ == 0) ? 1 : 2 ) && verifCase(plateau,coor[0],coor[1]+1) != 0 )
+  {
+    i = coor[1] + 1;
+    while (verifCase(plateau,coor[0],i) != ( (tJ == 0) ? 1 : 2 ) && verifCase(plateau,coor[0],i) != 0) { i++; }
+    if (verifCase(plateau,coor[0],i) == 0 )
+    {
+      tab[j][0] = coor[0];
+      tab[j][1] = j;
+      j++;
+    }
+  }
+  // gauche
+  if (verifCase(plateau,coor[0],coor[1]-1) != ( (tJ == 0) ? 1 : 2 ) && verifCase(plateau,coor[0],coor[1]-1) != 0 )
+  {
+    i = coor[1] - 1;
+    while (verifCase(plateau,coor[0],i) != ( (tJ == 0) ? 1 : 2 ) && verifCase(plateau,coor[0],i) != 0) { i++; }
+    if (verifCase(plateau,coor[0],i) == 0 )
+    {
+      tab[j][0] = coor[0];
+      tab[j][1] = j;
+      j++;
+    }
+  }
+  return tab;
+}
+
+void deplacementOpportuniste(int* coor, int tJ, int** plateau)
+{
+  int i;
+  int num = numEnnemiAutour(tJ,coor,plateau);
+  if (num > 0)
+  {
+    int** tableauCaseAVerifier = malloc(sizeof(int*)*num);
+    for (i = 0; i < num; i++)
+    {
+      tableauCaseAVerifier[i] = malloc(sizeof(int)*2);
+    }
+
+    tableauCaseAVerifier = prochaineCaseVide(plateau,tableauCaseAVerifier,tJ,num,coor);
+
+    for (i = 0; i < num ; i++)
+    {
+      if ( parcoursPossible(tableauCaseAVerifier[i],plateau,tJ) )
+      {
+        movePion(plateau,parcoursPossibleReturnCoorPion(tableauCaseAVerifier[i],plateau,tJ),tableauCaseAVerifier[i]);
+        return;
+      }
+    }
+  }
 }
