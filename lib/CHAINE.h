@@ -11,6 +11,9 @@ int* coordonneesVersEntier(char* coordonnees);
 char* entierVersCoordonnees(int* coordonnees);
 char* demanderChaine(int nbCaracteres);
 void viderBuffer();
+char get_c(int longueur);
+void afficheBuffer();
+int lire(char *chaine, int longueur);
 char* extraction(char* src, int debut, int fin);
 
 #endif

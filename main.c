@@ -1,106 +1,217 @@
 #include <stdio.h>
-#include "HS_STRUCTURES.h"
-#include "HS_MECANIQUES.h"
+#include "lib/HS_STRUCTURES.h"
+#include "lib/HS_MECANIQUES.h"
+#include "lib/HS_AFFICHAGE.h"
+#include "lib/HS_FICHIERS.h"
+#include "lib/CHAINE.h"
 
-
+void menuPrincipal(struct s_jeu* jeu);
+void hasamiShogi(struct s_jeu* jeu);
+void menuPause(struct s_jeu* jeu);
+void menuChargement(struct s_jeu* jeu);
 
 
 int main(int argc, char *argv[])
 {
   struct s_jeu* jeu = initialisationJeu();
+  jeu -> partie = initialisationPartie();
 
   if (argc > 1)
   {
     logF("Demarrage par argument");
     printf("Y a de l argument les gars !\n");
+    //if argument pas compris
   }
   else
   {
-    char nbUser = -1;
-    menu: ;
-    printf("------------\n");
-    printf("Hasami Shogi\n");
-    printf("------------\n");
-    printf("\n\n");
-    printf("1 - Jeu Solo\n");
-    printf("2 - Jeu Deux Joueurs\n");
-    printf("3 - Charger une partie\n");
-    printf("\n0 - Quitter\n");
+    menuPrincipal(jeu);
+
+  }
+  return 0;
+}
+
+void menuPrincipal(struct s_jeu* jeu)
+{
+  char nbUser = -1;
+  int quit = 0;
+  while (quit == 0)
+  {
+    puts("------------");
+    puts("Hasami Shogi");
+    puts("------------");
+    puts("\n");
+    puts("1 - Jeu Solo");
+    puts("2 - Jeu Deux Joueurs");
+    puts("3 - Charger une partie");
+    puts("\n0 - Quitter");
 
     saisie:
     printf("\n\nVotre Choix : ");
 
-    scanf("%c",&nbUser);
+    nbUser = get_c(10);
     nbUser -= '0';
 
     switch (nbUser)
     {
       case 0 :
+        quit = 1;
         goto end;
         break;
+
       case 1 :
-        goto solo;
+        jeu -> solo = 1;
+        puts("\nMode non developpe !");
+        puts("\nAppuyez sur entree pour revenir au menu ..");
+        getchar();
+        goto end;
       break;
+
       case 2 :
-        goto multi;
+        jeu -> solo = 0;
+        jeu -> partie = (jeu -> partie == NULL) ? initialisationPartie() : jeu->partie ;
+        hasamiShogi(jeu);
+        goto end;
       break;
+
       case 3 :
-        goto load;
+        jeu -> partie = (jeu -> partie == NULL) ? initialisationPartie() : jeu->partie ;
+        menuChargement(jeu);
+        goto end;
       break;
+
       default :
         printf("Saisie incorrecte !\n");
         goto saisie;
         break;
     }
-  }
-
-  load: ;
-  if (jeu->partie != NULL);
-  else jeu -> partie = initialisationPartie();
-  if (!chargement("save",jeu))
-  {goto jeu;}
-  else
-  {goto menu;}
-
-
-  solo: ;
-  jeu -> solo = 1;
-  
-  goto menu;
-
-
-  multi: ;
-  jeu -> partie = initialisationPartie();
-  jeu -> solo = 0;
-
-
-  jeu: ;
-
-
-  do {
-    tour(jeu);
-    if ( jeu->partie->save == 1)
+    end: ;
+    if (jeu->partie != NULL)
     {
-      printf("\nPartie Sauvegardee !\n");
+      if (jeu->partie->load == 1)
+      {
+        jeu->partie->load = 0;
+        hasamiShogi(jeu);
+      }
+    }
+  }
+}
+
+void hasamiShogi(struct s_jeu* jeu)
+{
+  do {
+    DebutTour: ;
+    //Deroulement du tour
+    tour(jeu);
+    //Si sortie sauvegarde, on sauvegarde puis retour au menu
+
+    if (jeu->partie->pause == 2)
+    {
       deconstructionPartie(jeu->partie);
       jeu->partie = NULL;
-      goto menu;
+      return;
     }
+    if (jeu->partie->pause == 1)
+    {
+      jeu->partie->pause = 0;
+      menuPause(jeu);
+      goto DebutTour;
+    }
+
+    //Si le tour est considéré comme complet, on incrémente
     jeu->partie->compteurTour++;
     jeu->partie->tourJoueur = jeu->partie->compteurTour % 2;
-  } while(!victoire(jeu->partie->pionsRestants,jeu->partie->tourJoueur) || jeu->partie->save != 1 );
+    //on vérifie si la condition de victoire est avéré et on continue
+  } while(!victoire(jeu->partie->pionsRestants,jeu->partie->tourJoueur));
 
   jeu->partie->compteurTour--;
   jeu->partie->tourJoueur = jeu->partie->compteurTour % 2;
 
-  printf("\n\nPartie Terminée !\n");
-  printf("Victoire du joueur %d en %d Tours !\n",jeu->partie->tourJoueur, jeu -> partie->compteurTour+1);
+  refreshPlateau(jeu->partie->pionsJoueurs,jeu->partie->plateau);
+  afficheInfosJeu(jeu->partie);
+
+  printf("\n\nPARTIE TERMIN%cE !\n",144);
+  printf("Victoire du joueur %d en %d Tours !\n",jeu->partie->tourJoueur+1, jeu -> partie->compteurTour+1);
   printf("\n\nRetour au menu : Appuyez sur Entree pour continuer ...");
   deconstructionPartie(jeu->partie);
   jeu->partie = NULL;
   getchar();
-  goto menu;
+  return;
 
-  end:
-  return 0;
+}
+
+void menuPause(struct s_jeu* jeu)
+{
+  char nbUser = -1;
+  menu: ;
+  puts("--------------------");
+  puts("Hasami Shogi - Pause");
+  puts("--------------------");
+  puts("\n");
+  puts("1 - Sauvegarder");
+  puts("2 - Retour au jeu");
+  puts("\n0 - Abandonner");
+
+  saisie: ;
+  printf("\n\nVotre Choix : ");
+
+  nbUser = get_c(10);
+  nbUser -= '0';
+
+  switch (nbUser)
+  {
+    case 0 :
+      printf("Etes-vous sur y/n : ");
+      nbUser = get_c(10);
+
+      if (nbUser == 'y')
+      {
+        jeu->partie->pause = 2;
+        return;
+      }
+      break;
+    case 1 :
+      puts("Attention mettre le meme nom qu'une sauvegarde existante l'ecrasera !");
+      printf("Entrez un nom de sauvegarde : ");
+      jeu->nameFile = demanderChaine(30);
+      sauvegarde(jeu->nameFile,jeu);
+      puts("Appuyez sur Entree pour continuer ...");
+      getchar();
+    break;
+    case 2 :
+      return;
+    break;
+    default :
+      puts("Saisie incorrecte !");
+      goto saisie;
+    break;
+  }
+}
+
+
+void menuChargement(struct s_jeu* jeu)
+{
+  char nbUser = -1;
+  puts("-------------------------");
+  puts("Hasami Shogi - Chargement");
+  puts("-------------------------");
+  puts("\n");
+  puts("Sauvegardes :\n");
+  listerSaves();
+  puts("\n0 - Quitter");
+  puts("\n");
+
+  printf("Choississez une sauvegarde : ");
+  nbUser = get_c(10);
+
+  nbUser -= '0';
+
+  if (nbUser == 0)
+  {
+    return;
+  }
+  else
+  {
+    chargement(renvoiNomSave( (int) nbUser ),jeu);
+    jeu->partie->load = 1;
+  }
 }

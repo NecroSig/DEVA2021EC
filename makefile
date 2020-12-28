@@ -9,18 +9,25 @@ else
 endif
 
 all= $(EXEC)
+objects := $(wilcard *.o)
 
-jeu : main.o hs_structures.o hs_mecaniques.o chaine.o
-	$(CC) -o jeu main.o hs_structures.o hs_mecaniques.o chaine.o $(CGFLAGS)
+jeu : main.o hs_structures.o hs_affichage.o hs_fichiers.o hs_mecaniques.o chaine.o
+	$(CC) -o jeu main.o hs_structures.o hs_fichiers.o hs_mecaniques.o hs_affichage.o chaine.o $(CGFLAGS)
 
 main.o : main.c
 	$(CC) -c main.c $(CGFLAGS)
 
-chaine.o : CHAINE.c CHAINE.h
-	$(CC) -c CHAINE.c $(CGFLAGS)
+chaine.o : lib/CHAINE.c lib/CHAINE.h
+	$(CC) -c lib/CHAINE.c $(CGFLAGS)
 
-hs_structures.o : HS_STRUCTURES.c HS_STRUCTURES.h
-	$(CC) -c HS_STRUCTURES.c $(CGFLAGS)
+hs_affichage.o : lib\HS_AFFICHAGE.c lib/HS_AFFICHAGE.h
+	$(CC) -c lib/HS_AFFICHAGE.c $(CGFLAGS)
 
-hs_mecaniques.o : HS_MECANIQUES.c HS_MECANIQUES.h HS_STRUCTURES.h CHAINE.h
-	$(CC) -c HS_MECANIQUES.c $(CGFLAGS)
+hs_fichiers.o : lib\HS_FICHIERS.c lib\HS_FICHIERS.h
+	$(CC) -c lib/HS_FICHIERS.c $(CGFLAGS)
+
+hs_structures.o : lib/HS_STRUCTURES.c lib/HS_STRUCTURES.h
+	$(CC) -c lib/HS_STRUCTURES.c $(CGFLAGS)
+
+hs_mecaniques.o : lib/HS_MECANIQUES.c lib/HS_MECANIQUES.h lib/HS_STRUCTURES.h lib/CHAINE.h
+	$(CC) -c lib/HS_MECANIQUES.c $(CGFLAGS)

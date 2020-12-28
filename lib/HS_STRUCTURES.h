@@ -4,6 +4,8 @@
 
 struct s_partie
 {
+  int pause;
+  int load;
   int save;
   int tourJoueur; // 0=J1, 1=J2
   int compteurTour;
@@ -21,7 +23,6 @@ struct s_jeu
   char **playerNames; //["Trevor","Bryan"]
   struct s_partie *partie;
 };
-
 
 int** gen_plateau();
 int*** gen_pionsjoueur();

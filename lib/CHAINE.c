@@ -113,12 +113,51 @@ char* entierVersCoordonnees(int* coordonnees)
 
 void viderBuffer()
 {
-    int i = 0;
-    while (i != '\n' && i != EOF)
-    {
-      i = getchar();
-    }
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF) { }
 }
+
+char* strsrch(char* chaine,char charac)
+{
+  int i=0;
+  while(chaine[i] != charac)
+  {
+    i++;
+  }
+  return (chaine + i);
+}
+
+char get_c(int longueur)
+{
+  char* buffer = NULL;
+  char lettre;
+
+  buffer = malloc(sizeof(char)*longueur);
+
+  if (buffer == NULL)
+   exit(0);
+
+  if ( fgets(buffer,longueur,stdin) != NULL)
+  {
+    while (*buffer != '\0')
+    {
+      if (*buffer != ' ' && *(buffer) != '\n')
+      {
+        lettre = *buffer;
+        break;
+      }
+      buffer++;
+    }
+  }
+  else
+  {
+    viderBuffer();
+  }
+
+  free(buffer);
+  return lettre;
+}
+
 
 char* demanderChaine(int nbCaracteres)
 {
