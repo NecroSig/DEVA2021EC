@@ -11,8 +11,8 @@ endif
 all= $(EXEC)
 objects := $(wilcard *.o)
 
-jeu : main.o hs_structures.o hs_affichage.o hs_fichiers.o hs_mecaniques.o chaine.o
-	$(CC) -o jeu main.o hs_structures.o hs_fichiers.o hs_mecaniques.o hs_affichage.o chaine.o $(CGFLAGS)
+jeu : main.o hs_ia.o hs_structures.o hs_affichage.o hs_fichiers.o hs_mecaniques.o chaine.o
+	$(CC) -o jeu main.o hs_ia.o hs_structures.o hs_fichiers.o hs_mecaniques.o hs_affichage.o chaine.o $(CGFLAGS)
 
 main.o : main.c
 	$(CC) -c main.c $(CGFLAGS)
@@ -31,3 +31,6 @@ hs_structures.o : lib/HS_STRUCTURES.c lib/HS_STRUCTURES.h
 
 hs_mecaniques.o : lib/HS_MECANIQUES.c lib/HS_MECANIQUES.h lib/HS_STRUCTURES.h lib/CHAINE.h
 	$(CC) -c lib/HS_MECANIQUES.c $(CGFLAGS)
+
+hs_ia.o : lib/HS_IA.c lib/HS_IA.h
+	$(CC) -c lib/HS_IA.c $(CGFLAGS)

@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "HS_STRUCTURES.h"
 #include "CHAINE.h"
 
@@ -96,7 +98,7 @@ void affichePlateau(int **tab, int tj)
 
 void afficheInfosJeu(struct s_partie* p)
 {
-  //CLEARSCREEN();
+  CLEARSCREEN();
   printf("--- Tour : %2d ---\n\n",p->compteurTour + 1 );
   printf("Tour du joueur %d \n",p->tourJoueur + 1);
   printf("Pions restants : %d\n",p->pionsRestants[p->tourJoueur] );

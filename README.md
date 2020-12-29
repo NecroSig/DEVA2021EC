@@ -36,3 +36,25 @@ Le but de manger toutes les pièces de l'adversaire, pour manger une pièce il f
 ### Conditions de victoire
 
 Que l'adversaire possède plus que deux pièces ou moins
+
+Utilisation du logiciel
+-----------------------
+
+### Paramètres
+
++ -solo pour joueur contre l'ordinateur (peut planter !)
++ -multi pour une partie 2 joueurs (100% fonctionnel)
++ -save NAMEFILE charge la partie NAMEFILE dans le dossier /save
+
+### Comment jouer
+
++ une fois sur le plateau il vous faudra selectionner votre pion via les coordonnées indiquées sur le plateau et indiquer la case où aller, le déplacement se fera uniquement si c'est une de vos pièces (indiqués par une étoile) et si le déplacement est possible
++ la capture d'un pion est instantané, vous ne la verrez que par le nombre de pions restants ou par le dernier coup joué
++ vous pouvez sauvegarder ou quitter en accédant au menu pause en tapant 00 lors du choix du pion.
+
+
+### Remarques
+
++ des sauvegardes sont déjà disponibles pour tester certaines fonctionnalités du jeu le menu du chargement affiche toutes les sauvegardes dans le dossier save.
+
++ le programme a été compilé sous windows, il se peut qu'il ne tourne pas sous linux

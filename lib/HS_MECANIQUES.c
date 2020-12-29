@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "HS_STRUCTURES.h"
 #include "HS_AFFICHAGE.h"
+#include "HS_IA.h"
 #include "HS_FICHIERS.h"
 #include "CHAINE.h"
 
@@ -134,13 +135,21 @@ int verifCase(int** plateau, int x, int y)
   }
 }
 
-void movePion(int** plateau, int* depart, int* arrivee)
+void movePion(int** plateau, int* depart, int* arrivee, char* derMove)
 {
+  char* dTxt = entierVersCoordonnees(depart);
+  char* aTxt = entierVersCoordonnees(arrivee);
+
   //retirer le pion du plateau et échanger les valeurs
   plateau[depart[0]][depart[1]] = 0;
 
   depart[0] = arrivee[0];
   depart[1] = arrivee[1];
+
+  //on affiche le dernier mouvement
+  sprintf(derMove,"%s -> %s",dTxt,aTxt);
+  free(dTxt);
+  free(aTxt);
 }
 
 int pionEJoueur(int nbJoueur,int*** pions, int* pionSelect)
@@ -363,14 +372,12 @@ int deplacementPion(struct s_partie* p)
 
   if (!mouvementPionPossible(p->plateau,pionAdeplacer,arrivee) && !pionEJoueur(p->tourJoueur,p->pionsJoueurs,pionAdeplacer))
   {
-    movePion(p->plateau,pionAdeplacer,arrivee);
-
-    minToMaj(departTxt);
-    minToMaj(arriveeTxt);
-    sprintf(p->dernierMouvement,"%s -> %s",departTxt,arriveeTxt);
+    movePion(p->plateau,pionAdeplacer,arrivee,p->dernierMouvement);
 
     free(depart);
-
+    free(departTxt);
+    free(arrivee);
+    free(arriveeTxt);
     return 0;
   }
 }
@@ -383,8 +390,22 @@ void tour(struct s_jeu* j)
     }
     //Debut du Tour
     refreshPlateau(j->partie->pionsJoueurs,j->partie->plateau);
-    do {  afficheInfosJeu(j->partie); }
-    while(deplacementPion(j->partie));
+
+    if (j->solo == 1 && j->partie->tourJoueur == 1)
+    {
+      //interaction machine
+      afficheInfosJeu(j->partie);
+      puts("\nL'IA Reflechit, et elle reflechit mal, veuillez patienter ..");
+      puts("il est possible que le jeu soit dans une boucle si vous voyez ce message + 5 secondes");
+      ia_heuristiqueSimple(j->partie);
+    }
+    else
+    {
+      //Interaction joueur
+      do {  afficheInfosJeu(j->partie); }
+      while(deplacementPion(j->partie));
+    }
+
 
     //Verification si commande effectué
     if (j->partie->pause == 1)

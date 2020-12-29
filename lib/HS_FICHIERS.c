@@ -104,6 +104,7 @@ int sauvegarde(char* nomFichier,struct s_jeu* jeu)
 
 int chargement(char* nomFichier, struct s_jeu* jeu)
 {
+  printf("%s\n",nomFichier);
   int i;
   int j;
   FILE* fichier = NULL;

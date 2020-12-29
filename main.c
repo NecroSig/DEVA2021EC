@@ -1,9 +1,22 @@
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "lib/HS_STRUCTURES.h"
 #include "lib/HS_MECANIQUES.h"
 #include "lib/HS_AFFICHAGE.h"
 #include "lib/HS_FICHIERS.h"
 #include "lib/CHAINE.h"
+
+
+#if _WIN32
+    #define CLEARSCREEN(); system("cls");
+  #elif __LINUX__
+    #define CLEARSCREEN(); system("clear");
+	#else
+	  #define CLEARSCREEN(); printf("\n");
+#endif
+
+
 
 void menuPrincipal(struct s_jeu* jeu);
 void hasamiShogi(struct s_jeu* jeu);
@@ -18,9 +31,36 @@ int main(int argc, char *argv[])
 
   if (argc > 1)
   {
-    logF("Demarrage par argument");
-    printf("Y a de l argument les gars !\n");
-    //if argument pas compris
+    puts("Demarrage par argument");
+    printf("Il y a %d arguments\n",argc);
+    int i;
+    for (i=0; i<argc; i++)
+    {
+      printf("[%s]",argv[i]);
+      puts("");
+      if (compare(argv[i],"-save") && argv[i+1] != NULL)
+      {
+        chargement(argv[i+1],jeu);
+        hasamiShogi(jeu);
+        goto menu;
+      }
+      if (compare(argv[i],"-solo"))
+      {
+        jeu -> solo = 1;
+        jeu -> partie = (jeu -> partie == NULL) ? initialisationPartie() : jeu->partie ;
+        hasamiShogi(jeu);
+        goto menu;
+      }
+      if (compare(argv[i],"-multi"))
+      {
+        jeu -> solo = 0;
+        jeu -> partie = (jeu -> partie == NULL) ? initialisationPartie() : jeu->partie ;
+        hasamiShogi(jeu);
+        goto menu;
+      }
+    }
+    menu: ;
+    menuPrincipal(jeu);
   }
   else
   {
@@ -36,6 +76,7 @@ void menuPrincipal(struct s_jeu* jeu)
   int quit = 0;
   while (quit == 0)
   {
+    CLEARSCREEN();
     puts("------------");
     puts("Hasami Shogi");
     puts("------------");
@@ -60,9 +101,8 @@ void menuPrincipal(struct s_jeu* jeu)
 
       case 1 :
         jeu -> solo = 1;
-        puts("\nMode non developpe !");
-        puts("\nAppuyez sur entree pour revenir au menu ..");
-        getchar();
+        jeu -> partie = (jeu -> partie == NULL) ? initialisationPartie() : jeu->partie ;
+        hasamiShogi(jeu);
         goto end;
       break;
 
@@ -141,6 +181,7 @@ void hasamiShogi(struct s_jeu* jeu)
 
 void menuPause(struct s_jeu* jeu)
 {
+  CLEARSCREEN();
   char nbUser = -1;
   menu: ;
   puts("--------------------");
@@ -190,6 +231,7 @@ void menuPause(struct s_jeu* jeu)
 
 void menuChargement(struct s_jeu* jeu)
 {
+  CLEARSCREEN();
   char nbUser = -1;
   puts("-------------------------");
   puts("Hasami Shogi - Chargement");
